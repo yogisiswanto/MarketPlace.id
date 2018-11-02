@@ -23,7 +23,10 @@ class User extends CI_Controller {
 
 		parent::__construct();
 		$this->load->model('User_Model');
-		// $this->load->library('form_validation');
+		$this->load->library('Lcg');
+		$this->load->library("Rc6");
+		$this->load->library("Dt");
+		$this->load->library("Date");
 	}
 
 	// function index
@@ -353,5 +356,75 @@ class User extends CI_Controller {
 			// redirect into User/index
 			redirect(site_url().'/User/index');
 		}
+	}
+
+	public function test()
+	{
+		$seed = "08567762778";
+
+		// $key = $this->lcg->random($seed);
+		$key = $this->lcg->random("08567762778");
+
+		$plaintext = $this->date->get();
+
+		$keyScheduling = $this->rc6->keySchedule($key);
+
+		$cipherText = $this->rc6->encrypt($plaintext, $keyScheduling);
+		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
+
+		$hash = sha1($cipherText);
+
+		$otp = $this->dt->make($hash);
+
+		$data = array();
+
+		$data['birthDay'] = $birthDay;
+		$data['seed'] = $seed;
+		$data['key'] = $key;
+		$data['plaintext'] = $plaintext;
+		$data['keyScheduling'] = $keyScheduling;
+		$data['cipherText'] = $cipherText;
+		$data['decryption'] = $decryption;
+		$data['hash'] = $hash;
+		$data['otp'] = $otp;
+
+		debug($data);
+
+		
+		// $test = $this->lcg->random(300495);
+
+		//  // Key Scheduling
+		//  $key = $this->rc6->keySchedule("122");
+		//  $key2 = $this->rc6->keySchedule("123");
+
+		//  // Encryption
+		// $cipherText1 = $this->rc6->encrypt("123", $key);
+		//  $cipherText2 = $this->rc6->encrypt("123", $key2);
+
+		//  // Reversing Block Encryption
+		// //  $cipherText1 = $this->rc6->reverseBlockConverter($encrypt1);
+		// //  $cipherText2 = $this->rc6->reverseBlockConverter($encrypt2);
+		
+		//  echo 'Key 1 = 122<br/>';
+		//  echo 'Key 2 = 123<br/>';
+		//  echo 'Plain Text = 123<br/>';
+		//  echo '-----------------------------<br/>';
+		//  echo 'Cipher Text 1 = ' . $cipherText1 . '<br/>';
+		//  echo 'Cipher Text 2 = ' . $cipherText2 . '<br/>';
+		// $plaintext = $this->rc6->decrypt($cipherText1, $key);
+		// echo $plaintext;
+
+		// $hash = sha1('yogisiswanto');
+
+		// $otp = $this->dt->make($hash);
+		// debug($otp);
+		// debug($hash);
+		// debug($hash[38]);
+		// echo $hash;
+		// debug($otp);
+
+		// $date = $this->date->withoutDelimiter("1995-04-30");
+		// $date = $this->date->get();
+		// debug($date);
 	}
 }

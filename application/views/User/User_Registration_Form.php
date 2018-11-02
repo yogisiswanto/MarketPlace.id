@@ -119,7 +119,7 @@
                                     echo "</tr>";
                                     echo "<tr>";
                                         echo "<td>"; 
-                                            echo form_input(array('id'=>'user_phone_number','name'=>'user_phone_number', 'placeholder' => 'Nomor Handphone', 'onclick' => 'user_phone_number_validation()',  'class' => 'form-control', 'size' => '30',));
+                                            echo form_input(array('id'=>'user_phone_number','name'=>'user_phone_number', 'placeholder' => 'Nomor Handphone (Ex. 08xxxxxxxx)', /*'onclick' => 'user_phone_number_validation()',*/  'class' => 'form-control', 'size' => '30',));
                                             echo "<span id='user_phone_number_validation_respon'> </span>";
                                             echo br(1);
                                         echo "</td>"; 

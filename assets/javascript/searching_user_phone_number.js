@@ -16,10 +16,10 @@ $(document).ready(function(){
         var regex_phone_number = /(\+62 ((\d{3}([ -]\d{3,})([- ]\d{4,})?)|(\d+)))|(\(\d+\) \d+)|\d{3}( \d+)+|(\d+[ -]\d+)|\d+/gm;
             
         // base_url versi javascript
-        var base_url = window.location.origin + '/MarketPlace/index.php/User/user_phone_number_check_for_jquery';
+        var base_url = window.location.origin + '/MarketPlace.id/index.php/User/user_phone_number_check_for_jquery';
 
-      
-        // console.log(base_url);
+        var regexResult = regex_phone_number.test(user_phone_number);
+        // console.log(regex_phone_number.test(user_phone_number));
 
         // kondisi jika input text user_phone_number kosong
         if (user_phone_number == '') {
@@ -30,10 +30,10 @@ $(document).ready(function(){
             // maka akan menampilkan respon 
             $('#user_phone_number_validation_respon')
             .html('Nomer handphone belum diisi')
-            .css({'color' : 'red', 'font-size' : '11px'});
+            .css({'color' : 'red', 'font-size' : '12px'});
 
-        // kondisi jika input text user_phone_number tidak kosong
-        } else if(regex_phone_number.test(user_phone_number)){
+        // // kondisi jika input text user_phone_number tidak kosong
+        } else if(regexResult == true){
 
             // maka sistem akan menunggu 2 detik untuk mengecek dari database
             x_timer = setTimeout(function(){
@@ -49,12 +49,10 @@ $(document).ready(function(){
                         // fungsi loading
                         setTimeout(function(){
 
-                            console.log(data);
-
                             // kondisi jika respon sama dengan 1 (URL sudah ada),
                             if (data == 1) {
 
-                                console.log(true);
+                                // console.log(true);
 
                                 // menambahkan class css is-invalid kedalam input text user_phone_number
                                 $('#user_phone_number').addClass('is-invalid');
@@ -62,7 +60,7 @@ $(document).ready(function(){
                                 // maka akan menampilkan respon sudah ada
                                 $('#user_phone_number_validation_respon')
                                     .html('Nomer handphone sudah pernah digunakan. Silahkan gunakan Nomer lain.')
-                                    .css({'color' : 'red', 'font-size' : '11px'});
+                                    .css({'color' : 'red', 'font-size' : '12px'});
 
                             // kondisi jika respon sama dengan 0 (nomor handphone belum ada),
                             }else{
@@ -73,7 +71,7 @@ $(document).ready(function(){
                                 // menghilangkan css dan html dari user_phone_number_respon
                                 $('#user_phone_number_validation_respon').empty();
 
-                                console.log(false);
+                                // console.log(false);
                             }
 
                         // ini bracket setTimeout
@@ -96,7 +94,7 @@ $(document).ready(function(){
             // maka akan menampilkan respon sudah ada
             $('#user_phone_number_validation_respon')
                 .html('Nomer handphone sudah pernah digunakan. Silahkan gunakan Nomer lain.')
-                .css({'color' : 'red', 'font-size' : '11px'});
+                .css({'color' : 'red', 'font-size' : '12px'});
 
 
         // ini bracket else
