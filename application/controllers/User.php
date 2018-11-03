@@ -27,6 +27,7 @@ class User extends CI_Controller {
 		$this->load->library("Rc6");
 		$this->load->library("Dt");
 		$this->load->library("Date");
+		$this->load->library("Sms");
 	}
 
 	// function index
@@ -111,7 +112,9 @@ class User extends CI_Controller {
 					'user_id'			=> $result->row()->user_id,
 					'user_full_name' 	=> $result->row()->user_full_name,
 					'user_status'		=> $result->row()->user_status,
+					'user_phone_number'	=> $result->row()->user_phone_number,
 					'login_status'		=> TRUE,
+					'otp_count'			=> 0,
 				);
 
 				// inserting user data into session
@@ -255,11 +258,19 @@ class User extends CI_Controller {
 			redirect(site_url().'/User/index');
 		
 		// when session is not empty and user status is 0
-		}else if($this->session->user_status == 0){
+		}else if($this->session->user_status == 0 && $this->session->otp_count < 3){
+
+			$this->test();
 
 			// displaying User_Activation_Form
-			$this->load->view('User/User_Activation_Form');
-			
+			// $this->load->view('User/User_Activation_Form');
+
+		// when session is not empty and user status is 0
+		}else if($this->session->otp_count == 3){
+
+		// displaying User_Activation_Form
+		$this->load->view('User/Forbiden');
+		
 		// when session is not empty and user status is 1
 		}else{
 
@@ -360,10 +371,12 @@ class User extends CI_Controller {
 
 	public function test()
 	{
-		$seed = "08567762778";
+		
+		$phoneNumber = $this->session->user_phone_number;
 
-		// $key = $this->lcg->random($seed);
-		$key = $this->lcg->random("08567762778");
+		$seed = $this->session->user_phone_number;
+
+		$key = $this->lcg->random($seed);
 
 		$plaintext = $this->date->get();
 
@@ -376,17 +389,35 @@ class User extends CI_Controller {
 
 		$otp = $this->dt->make($hash);
 
+		$otpCount = $this->session->otp_count + 1;
+
+		$this->session->set_userdata('otp_count', $otpCount);
+
+		$dateTime = $this->date->getDateTime($plaintext);
+
+		// update data after generate otp
+		$data = array(
+			'user_id'			=> $this->session->user_id,
+			'key_encryption' 	=> $key,
+			'time_generate'		=> $dateTime,
+			'activation_code'	=> $otp,
+		);
+
+		// $status = $this->sms->send($seed, $otp);
+
 		$data = array();
 
-		$data['birthDay'] = $birthDay;
+		$data['otpCount'] = $otpCount;
 		$data['seed'] = $seed;
-		$data['key'] = $key;
+		$data['dateTime'] = $dateTime;
 		$data['plaintext'] = $plaintext;
+		$data['key'] = $key;
 		$data['keyScheduling'] = $keyScheduling;
 		$data['cipherText'] = $cipherText;
 		$data['decryption'] = $decryption;
 		$data['hash'] = $hash;
 		$data['otp'] = $otp;
+		// $data['status'] = $status;
 
 		debug($data);
 
@@ -427,4 +458,5 @@ class User extends CI_Controller {
 		// $date = $this->date->get();
 		// debug($date);
 	}
+
 }

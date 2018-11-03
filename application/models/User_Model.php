@@ -24,6 +24,12 @@
             return $this->db->get();
         }
 
+        public function update($data)
+        {
+            $this->db->where('user_id', $data['user_id']);
+            $this->db->update('user', $data);
+        }
+
         public function check_phone_number($user_phone_number){
 
             $this->db->select('user_phone_number');

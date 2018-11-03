@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  
  /*
 ---------------------------------------------------------------------
-|            Linear Congruential Generator Documentation            |
+|                  Dynamic Truncation Documentation                 |
 ---------------------------------------------------------------------
 | If you want to use this Dynamic Truncation, just put this class   |
 | into your library.                                                |

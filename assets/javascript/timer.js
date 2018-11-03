@@ -44,6 +44,8 @@ function timer() {
             document.getElementById("submit").disabled = true; 
             document.getElementById('timer').style.display = 'none';
             document.getElementById('resend').style.display = 'inline';
+
+            activation_code_checking();
         }
 
 

@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  
  /*
 ---------------------------------------------------------------------
-|                            Date                                   |
+|                       Date Documentation                          |
 ---------------------------------------------------------------------
 | If you want to use this Date, just put this class into your       |
 | library.                                                          |
@@ -22,10 +22,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | After you put this class into your website library, you can load  |
 | and access this class on your controller                          |
 |                                                                   |
-| The usage of this Date class is simple, just call get method      |
+| To get Date Time without delimiter, just call get method          |
 |                                                                   |
 |                      $this->date->get();                          |
 |                                                                   |
+| To get Date Time with delimiter, just call getDateTime method     |
+|                                                                   |
+|                  $this->date->getDateTIme();                      |
 ---------------------------------------------------------------------
 */
 
@@ -49,15 +52,15 @@ class Date {
         return $date;
     }
 
-    // method convertion date from YYYY-mm-dd to YYYYmmdd
-    // public function getBirthDay($birthDay)
-    // {
-    //     // convertion
-    //     $date = date("Ymd", strtotime($birthDay));
+    // method convertion date from YYYYmmddhhiiss to YYYY-mm-dd hh:ii:ss
+    public function getDateTime($dateTime)
+    {
+        // convertion
+        $date = date("Y-m-d H:i:s", strtotime($dateTime));
 
-    //     // return date value
-    //     return $date;
-    // }
+        // return date value
+        return $date;
+    }
 
     // public function calculate($start)
     // {   
