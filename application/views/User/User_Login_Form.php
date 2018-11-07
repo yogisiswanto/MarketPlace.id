@@ -57,7 +57,7 @@
                                             $message = '';
 
                                             // if data was inserted
-                                            if($notification == 'success'){
+                                            if($notification == 'registration-success'){
 
                                                 $alertType = 'alert-success';
                                                 $message = 'Akun berhasil didaftarkan';

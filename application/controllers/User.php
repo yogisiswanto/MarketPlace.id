@@ -79,7 +79,7 @@ class User extends CI_Controller {
 
 		);
 
-		// setting confiuration onto set_rules
+		// setting configuration into set_rules
 		$this->form_validation->set_rules($config);
 
 		// if value form validation is false, it return to User_Login_Form again and will display errors message
@@ -90,13 +90,14 @@ class User extends CI_Controller {
 		// if value form validation is true, it will prosses code bellow
 		}else{
 
+			// getting username and password from User_Login_Form
 			$username = $this->input->post('user_name');
 			$password = md5($this->input->post('user_password'));
 
+			// checking username and password on database
 			$result = $this->User_Model->get($username, $password);
 
-			// debug($password);
-
+			// when username and password dismatch
 			if ($result->num_rows() == 0) {
 				
 				// setting notification when login is fail
@@ -105,6 +106,7 @@ class User extends CI_Controller {
 				// redirect into User/index
 				redirect(site_url().'/User/index');
 			
+			// when username and password is match			
 			}else{
 
 				// data login from user
@@ -208,7 +210,7 @@ class User extends CI_Controller {
 			),
 		);
 
-		// setting confiuration onto set_rules
+		// setting configuration into set_rules
 		$this->form_validation->set_rules($config);
 
 		// if value of form validation is false, it return to User_Registration_Form again and will display errors message
@@ -217,7 +219,8 @@ class User extends CI_Controller {
 			// setting notification when data is not insert
 			$this->session->set_flashdata('notification', 'warning');
 
-			$this->load->view('User/User_Registration_Form');
+			// redirect into User/User_Registration_Form
+			redirect(site_url().'/User/User_Registration_Form');
 		
 		// if value of form validation is true, it will prosses code bellow
 		}else {
@@ -238,7 +241,7 @@ class User extends CI_Controller {
 			$result = $this->User_Model->insert($data);
 
 			// setting notification when data is insert
-			$this->session->set_flashdata('notification', 'success');
+			$this->session->set_flashdata('notification', 'registration-success');
 			
 			// redirect into User/index
 			redirect(site_url().'/User/index');
@@ -249,8 +252,6 @@ class User extends CI_Controller {
 	// function User_Activation_Form
 	public function User_Activation_Form(){
 
-		
-
 		// when session is empty
 		if (!isset($this->session->login_status)) {
 			
@@ -260,16 +261,17 @@ class User extends CI_Controller {
 		// when session is not empty and user status is 0
 		}else if($this->session->user_status == 0 && $this->session->otp_count < 3){
 
-			$this->test();
+			// generating and sending activation code
+			$this->generateOTP();
 
 			// displaying User_Activation_Form
-			// $this->load->view('User/User_Activation_Form');
+			$this->load->view('User/User_Activation_Form');
 
 		// when session is not empty and user status is 0
 		}else if($this->session->otp_count == 3){
 
-		// displaying User_Activation_Form
-		$this->load->view('User/Forbiden');
+			// displaying User_Activation_Form
+			$this->load->view('User/Forbiden');
 		
 		// when session is not empty and user status is 1
 		}else{
@@ -305,10 +307,40 @@ class User extends CI_Controller {
 		// if value of form validation is true, it will prosses code bellow
 		}else {
 
-			$this->load->view('formsucces');
+			// getting activation code from User_Activation_Form
+			$activationCode = $this->input->post('activation_code');
 
+			// getting user_id from session
+			$userId = $this->session->user_id;
+
+			// getting activation code
+			$result = $this->User_Model->getActivationCode($userId, $activationCode);
+
+			// when activation code is match
+			if ($result == 1) {
+
+				// update user_status
+				$update = array(
+					'user_id'			=> $this->session->user_id,
+					'user_status'		=> 1,
+				);
+
+				// update user_status
+				$updateResult = $this->User_Model->update($update);
+				
+				// direct to formsucces
+				$this->load->view('User/welcome_page');
+			
+			// when activation code is not match
+			}else{
+
+				// setting notification when activation code is dismatch
+				$this->session->set_flashdata('notification', 'activation-code-dismatch');
+
+				// redirect to User_Activation_Form
+				redirect(site_url().'/User/User_Activation_Form');
+			}
 		}
-
 	}
 
 	// funtion validate unique user_phone_number
@@ -369,44 +401,59 @@ class User extends CI_Controller {
 		}
 	}
 
-	public function test()
+	public function generateOTP()
 	{
-		
+		// getting user phone number
 		$phoneNumber = $this->session->user_phone_number;
 
+		// using user phone number as seed
 		$seed = $this->session->user_phone_number;
 
+		// generate key for encryption using LCG
 		$key = $this->lcg->random($seed);
 
+		// getting plaintext from date (YYYYmmddHis)
 		$plaintext = $this->date->get();
 
+		// getting keyScheduling from key
 		$keyScheduling = $this->rc6->keySchedule($key);
 
+		// encryption plaintext using RC6 algorithm and keyScheduling
 		$cipherText = $this->rc6->encrypt($plaintext, $keyScheduling);
 		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
 
+		// hashing ciphertext using sha1
 		$hash = sha1($cipherText);
 
+		// make 6 digit otp using dynamic truncation
 		$otp = $this->dt->make($hash);
 
+		// counting otp generation
 		$otpCount = $this->session->otp_count + 1;
 
+		// updating otp generation
 		$this->session->set_userdata('otp_count', $otpCount);
 
+		// getting plaintext formated (YYYY-mm-dd H:i:s)
 		$dateTime = $this->date->getDateTime($plaintext);
 
 		// update data after generate otp
-		$data = array(
+		$update = array(
 			'user_id'			=> $this->session->user_id,
 			'key_encryption' 	=> $key,
 			'time_generate'		=> $dateTime,
 			'activation_code'	=> $otp,
 		);
 
+		// update key, time generate and otp
+		$updateResult = $this->User_Model->update($update);
+
+		//sending 6 digit otp using sms gateway
 		// $status = $this->sms->send($seed, $otp);
 
 		$data = array();
 
+		$data['updateResult'] = $updateResult;
 		$data['otpCount'] = $otpCount;
 		$data['seed'] = $seed;
 		$data['dateTime'] = $dateTime;
@@ -419,44 +466,8 @@ class User extends CI_Controller {
 		$data['otp'] = $otp;
 		// $data['status'] = $status;
 
-		debug($data);
+		// debug($data);
 
-		
-		// $test = $this->lcg->random(300495);
-
-		//  // Key Scheduling
-		//  $key = $this->rc6->keySchedule("122");
-		//  $key2 = $this->rc6->keySchedule("123");
-
-		//  // Encryption
-		// $cipherText1 = $this->rc6->encrypt("123", $key);
-		//  $cipherText2 = $this->rc6->encrypt("123", $key2);
-
-		//  // Reversing Block Encryption
-		// //  $cipherText1 = $this->rc6->reverseBlockConverter($encrypt1);
-		// //  $cipherText2 = $this->rc6->reverseBlockConverter($encrypt2);
-		
-		//  echo 'Key 1 = 122<br/>';
-		//  echo 'Key 2 = 123<br/>';
-		//  echo 'Plain Text = 123<br/>';
-		//  echo '-----------------------------<br/>';
-		//  echo 'Cipher Text 1 = ' . $cipherText1 . '<br/>';
-		//  echo 'Cipher Text 2 = ' . $cipherText2 . '<br/>';
-		// $plaintext = $this->rc6->decrypt($cipherText1, $key);
-		// echo $plaintext;
-
-		// $hash = sha1('yogisiswanto');
-
-		// $otp = $this->dt->make($hash);
-		// debug($otp);
-		// debug($hash);
-		// debug($hash[38]);
-		// echo $hash;
-		// debug($otp);
-
-		// $date = $this->date->withoutDelimiter("1995-04-30");
-		// $date = $this->date->get();
-		// debug($date);
 	}
 
 }

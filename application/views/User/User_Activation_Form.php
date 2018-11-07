@@ -62,18 +62,14 @@
                                             if($notification == 'login-success'){
 
                                                 $alertType = 'alert-success';
-                                                $message = 'Anda berhasil masuk. Silahkan Masukan kode otentikasi yang sudah dikirimkan melalui layanan SMS';
+                                                $message = 'Anda berhasil masuk. Silahkan Masukan kode Aktivasi yang sudah dikirimkan melalui layanan SMS';
 
                                             // when data was not inserted
-                                            }else if($notification == 'warning'){
+                                            }else if($notification == 'activation-code-dismatch'){
 
                                                 $alertType = 'alert-danger';
-                                                $message = 'Akun gagal didaftarkan';
+                                                $message = 'Kode Aktivasi tidak cocok';
                                                 
-                                            }elseif ($notification == 'login-fail') {
-                                                
-                                                $alertType = 'alert-danger';
-                                                $message = 'username/password salah';
                                             }
 
                                             echo    '<div id="notification" class="alert '.$alertType.' alert-dismissible fade show" role="alert">

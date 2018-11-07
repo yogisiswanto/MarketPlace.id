@@ -24,6 +24,15 @@
             return $this->db->get();
         }
 
+        public function getActivationCode($user_id, $activationCode)
+        {
+            $this->db->select('*');
+            $this->db->from('user');
+            $this->db->where('user_id', $user_id);
+            $this->db->where('activation_code', $activationCode);
+            return $this->db->get()->num_rows();
+        }
+
         public function update($data)
         {
             $this->db->where('user_id', $data['user_id']);
