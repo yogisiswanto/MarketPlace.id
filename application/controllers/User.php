@@ -25,7 +25,7 @@ class User extends CI_Controller {
 		$this->load->model('User_Model');
 		$this->load->library('Lcg');
 		$this->load->library("Rc6");
-		$this->load->library("Dt");
+		$this->load->library("Hotp");
 		$this->load->library("Date");
 		$this->load->library("Sms");
 	}
@@ -116,6 +116,7 @@ class User extends CI_Controller {
 					'user_status'		=> $result->row()->user_status,
 					'user_phone_number'	=> $result->row()->user_phone_number,
 					'login_status'		=> TRUE,
+					'seed'				=> $result->row()->user_phone_number,
 					'otp_count'			=> 0,
 				);
 
@@ -127,8 +128,6 @@ class User extends CI_Controller {
 
 				// redirect to User_Activation_Form
 				redirect(site_url().'/User/User_Activation_Form');
-				
-				// debug($this->session->has_userdata('user_full_name'));
 			}
 
 		}
@@ -407,10 +406,13 @@ class User extends CI_Controller {
 		$phoneNumber = $this->session->user_phone_number;
 
 		// using user phone number as seed
-		$seed = $this->session->user_phone_number;
+		$seed = $this->session->seed;
 
 		// generate key for encryption using LCG
 		$key = $this->lcg->random($seed);
+
+		// update seed with new value from lcg
+		$this->session->set_userdata('seed', $key);
 
 		// getting plaintext from date (YYYYmmddHis)
 		$plaintext = $this->date->get();
@@ -422,11 +424,11 @@ class User extends CI_Controller {
 		$cipherText = $this->rc6->encrypt($plaintext, $keyScheduling);
 		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
 
-		// hashing ciphertext using sha1
-		$hash = sha1($cipherText);
+		// getting current OTP generation
+		$otpCount = $this->session->otp_count;
 
-		// make 6 digit otp using dynamic truncation
-		$otp = $this->dt->make($hash);
+		// make 6 digit otp using HOTP method
+		$otp = $this->hotp->make($cipherText, $otpCount);
 
 		// counting otp generation
 		$otpCount = $this->session->otp_count + 1;
@@ -462,7 +464,6 @@ class User extends CI_Controller {
 		$data['keyScheduling'] = $keyScheduling;
 		$data['cipherText'] = $cipherText;
 		$data['decryption'] = $decryption;
-		$data['hash'] = $hash;
 		$data['otp'] = $otp;
 		// $data['status'] = $status;
 
