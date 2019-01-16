@@ -40,7 +40,14 @@ class Lcg {
     // function for generating random number
     public function random($seed)
     {
-        $X = (7 * $seed + 0) % 9999991;
+        $a = 7;
+        $x0 = $seed;
+        $b = 0;
+        $M = 9999991;
+
+        // $X = (7 * $seed + 0) % 9999991;
+        $X = ($a * $x0 + $b) % $M;
+        
         return $X;
     }
 }

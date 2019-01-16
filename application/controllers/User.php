@@ -444,7 +444,7 @@ class User extends CI_Controller {
 			'user_id'			=> $this->session->user_id,
 			'key_encryption' 	=> $key,
 			'time_generate'		=> $dateTime,
-			'activation_code'	=> $otp,
+			'activation_code'	=> $otp['code'],
 		);
 
 		// update key, time generate and otp
@@ -464,11 +464,42 @@ class User extends CI_Controller {
 		$data['keyScheduling'] = $keyScheduling;
 		$data['cipherText'] = $cipherText;
 		$data['decryption'] = $decryption;
-		$data['otp'] = $otp;
+		$data['otp'] = $otp['code'];
+		$data['HMAC'] = $otp['HMAC'];
 		// $data['status'] = $status;
 
 		// debug($data);
-
 	}
 
+	public function testHotp()
+	{
+		$hotp = array();
+
+		$hotp = $this->hotp->make("123456789", 1);
+		debug($hotp);
+	}
+
+	public function testLcg()
+	{
+		$key = $this->lcg->random("081200000000");
+		debug($key);
+	}
+
+	public function testRC6()
+	{
+		// getting keyScheduling from key
+		$keyScheduling = $this->rc6->keySchedule(12345);
+
+		// encryption plaintext using RC6 algorithm and keyScheduling
+		$cipherText = $this->rc6->encrypt("Yogi Siswanto", $keyScheduling);
+		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
+
+		$data = array(
+					'keyScheduling' => $keyScheduling, 
+					'encryption' => $cipherText,
+					'decryption' => $decryption					
+				);
+
+		debug($data);
+	}
 }

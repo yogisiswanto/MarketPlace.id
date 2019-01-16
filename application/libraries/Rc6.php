@@ -165,9 +165,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         public function keySchedule($userKey)
         {
             // variable instantiation
-            $r = 12;
+            $r = 20; //r nya ganti jadi 20
             $w = 32;
             $modulo = pow(2, $w);
+
+            //constanta inisialization
+            $P = 0xB7E15163;
+            $Q = 0x9E3779B9;
 
             // looping for instantiation variable $s with the default value is 0
             for ($i=0; $i < (2 * $r + 4); $i++) { 
@@ -176,34 +180,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
             // instantiation of array $s in index 0 with default value
-            $s[0] = 0xB7E15163;
+            $s[0] = $P;
 
             // looping for instantiate of array $s in index after 0
             for ($i=1; $i < (2 * $r + 4); $i++) { 
                 
-                    $s[$i] = ($s[$i - 1] + 0x9E3779B9) % (2 ** $w);
+                    $s[$i] = ($s[$i - 1] + $Q) % (2 ** $w);
             }
 
             // calling function blockConverter for user input key
             $encode = $this->blockConverter(str_pad($userKey, 16));
 
             // counting array of $encode
-            $encodeLenght = count($encode);
+            $c = count($encode);
             
             // make instansiation of array $l with default value is 0
-            for ($i=0; $i < $encodeLenght; $i++) { 
+            for ($i=0; $i < $c; $i++) { 
                     
                     $l[$i] = 0;
             }
 
             // adding value from $encode to array $l
-            for ($i=1; $i < $encodeLenght + 1; $i++) { 
+            for ($i=0; $i < $c; $i++) { 
                     
-                    $l[$encodeLenght - $i] = bindec($encode[$i - 1]);
+                //store the first byte of key into low-order array L
+                $l[$i] = bindec($encode[$i]);
             }
 
             // count the maximum value between $encodeLenght and sum of iteration
-            $v = max($encodeLenght, 2*$r+4);
+            $v = max($c, 2*$r+4);
 
             //variable instantiation
             $A = 0;
@@ -217,7 +222,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $A = $s[$i] = $this->ROL(($s[$i] + $A + $B) % $modulo, 3, 32);
                 $B = $l[$j] = $this->ROL(($l[$j] + $A + $B) % $modulo,  ($A + $B) % 32, 32);
                 $i = ($i + 1) % (2 * $r + 4);
-                $j = ($j + 1) % $encodeLenght;
+                $j = ($j + 1) % $c;
             }
 
             // return value of generate key
@@ -227,6 +232,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // function for encryption with input Sentence as plaintext and S as array from key
         public function encrypt($sentence, $s)
         {
+            // variable instantiation
+            $r = 20;
+            $w = 32;
+            $logw = 5;
+            $modulo = pow(2, $w);
+
             // convert plaintext into 4 register with 32 bit lenght
             $encode = $this->blockConverter($sentence);
             $encodeLenght = count($encode);
@@ -239,12 +250,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             // inisialtization of array for result encryption
             $encryption = array();
-
-            // variable instantiation
-            $r = 12;
-            $w = 32;
-            $logw = 5;
-            $modulo = pow(2, $w);
             
             // instantiation variable B and D
             $B = ($B + $s[0]) % $modulo;
@@ -253,14 +258,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // looping for processing encryption
             for ($i=1; $i < $r + 1; $i++) { 
                 
-                // multiplication between D with 2
-                // adding 1 with $twoMultipleD
-                // multiplication variable $twoMultipleDPlusOne with D
-                $twoMultipleD = gmp_mul("2",$D);
-                $twoMultipleDPlusOne = gmp_add($twoMultipleD, "1");
-                $DMultipleTwoMultipleDPlusOne = gmp_mul($D, $twoMultipleDPlusOne);
-
-
                 // multiplication between B with 2
                 // adding 1 with $twoMultipleB
                 // multiplication variable $twoMultipleBPlusOne with B
@@ -268,28 +265,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $twoMultipleBPlusOne = gmp_add($twoMultipleB, "1");
                 $BMultipleTwoMultipleBPlusOne = gmp_mul($B, $twoMultipleBPlusOne);
 
-                
-                // $DMultipleTwoMultipleDPlusOne mod by $modulo
-                //shift to left from $t_temp as much as $logw with 32 bit length
-                $u_temp = gmp_mod($DMultipleTwoMultipleDPlusOne, $modulo);
-                $u = $this->ROL($u_temp, $logw, 32);
+                // multiplication between D with 2
+                // adding 1 with $twoMultipleD
+                // multiplication variable $twoMultipleDPlusOne with D
+                $twoMultipleD = gmp_mul("2",$D);
+                $twoMultipleDPlusOne = gmp_add($twoMultipleD, "1");
+                $DMultipleTwoMultipleDPlusOne = gmp_mul($D, $twoMultipleDPlusOne);
 
                 // BDMultipleTwoMultipleBPlusOne mod by $modulo
                 //shift to left from $u_temp as much as $logw with 32 bit length
                 $t_temp = gmp_mod($BMultipleTwoMultipleBPlusOne, $modulo);
-                $t = $this->ROL($t_temp, $logw, 32);
+                $t = $this->ROL($t_temp, $logw, $w);
                 
+                // $DMultipleTwoMultipleDPlusOne mod by $modulo
+                //shift to left from $t_temp as much as $logw with 32 bit length
+                $u_temp = gmp_mod($DMultipleTwoMultipleDPlusOne, $modulo);
+                $u = $this->ROL($u_temp, $logw, $w);
+
                 // $t mod by 32
                 // $u mod by 32
-                $tmod = gmp_mod($t, 32);
-                $umod = gmp_mod($u, 32);
+                $tmod = gmp_mod($t, $w);
+                $umod = gmp_mod($u, $w);
 
                 // A bitwise XOR with T
                 //shift to left from $AXorT as much as $umod with 32 bit length
                 // adding $ROLA wiht $s
                 // $ROLAPlusS mod by $modulo
                 $AXorT = gmp_xor($A, $t);
-                $ROLA =  $this->ROL($AXorT, $umod, 32);
+                $ROLA =  $this->ROL($AXorT, $umod, $w);
                 $ROLAPlusS = gmp_add($ROLA, $s[2 * $i]);
                 $A = gmp_mod($ROLAPlusS, $modulo);
                 
@@ -298,7 +301,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 // adding $ROLC wiht $s
                 // $ROLCPlusS mod by $modulo
                 $CXorU = gmp_xor($C, $u);
-                $ROLC =  $this->ROL( $CXorU, $tmod, 32);
+                $ROLC =  $this->ROL( $CXorU, $tmod, $w);
                 $ROLCPlusS = gmp_add($ROLC, $s[2 * $i + 1]);
                 $C = gmp_mod($ROLCPlusS, $modulo);
 
@@ -330,6 +333,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // function for decryption with input Sentence as plaintext and S as array from key    
         public function decrypt($sentence, $s)
         {
+            // variable instantiation      
+            $r = 20;
+            $w = 32;
+            $logw = 5;
+            $modulo = pow(2, $w);
+
             // convert ciphertext into 4 register with 32 bit lenght        
             $encode = $this->blockConverter($sentence);
             $encodeLenght = count($encode);
@@ -342,12 +351,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             // inisialtization of array for return
             $decryption = array();
-
-            // variable instantiation      
-            $r = 12;
-            $w = 32;
-            $logw = 5;
-            $modulo = pow(2, $w);
 
             // instantiation variable B and D
             $C = ($C - $s[ 2 * $r + 3]) % $modulo;
@@ -362,8 +365,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $C = $B;
                 $B = $A;
                 $A = $temp;
-                
-                    
+                                    
                 // multiplication between D with 2
                 // adding 1 with $twoMultipleD
                 // multiplication variable $twoMultipleDPlusOne with D
@@ -371,32 +373,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $twoMultipleDPlusOne = gmp_add($twoMultipleD, "1");
                 $DMultipleTwoMultipleDPlusOne = gmp_mul($D, $twoMultipleDPlusOne);
                 
-
                 // multiplication between B with 2
                 // adding 1 with $twoMultipleB
                 // multiplication variable $twoMultipleBPlusOne with B
                 $twoMultipleB = gmp_mul("2",$B);
                 $twoMultipleBPlusOne = gmp_add($twoMultipleB, "1");
                 $BMultipleTwoMultipleBPlusOne = gmp_mul($B, $twoMultipleBPlusOne);
-                
-                
-                // BDMultipleTwoMultipleBPlusOne mod by $modulo
-                //shift to left from $u_temp as much as $logw with 32 bit length
-                $t_temp = gmp_mod($BMultipleTwoMultipleBPlusOne, $modulo);
-                $t = $this->ROL($t_temp, $logw, 32);
-                
-                
+                                
                 // $DMultipleTwoMultipleDPlusOne mod by $modulo
                 //shift to left from $t_temp as much as $logw with 32 bit length
                 $u_temp = gmp_mod($DMultipleTwoMultipleDPlusOne, $modulo);
-                $u = $this->ROL($u_temp, $logw, 32);
+                $u = $this->ROL($u_temp, $logw, $w);
 
-
+                // BDMultipleTwoMultipleBPlusOne mod by $modulo
+                //shift to left from $u_temp as much as $logw with 32 bit length
+                $t_temp = gmp_mod($BMultipleTwoMultipleBPlusOne, $modulo);
+                $t = $this->ROL($t_temp, $logw, $w);
+                
                 // $t mod by 32
                 // $u mod by 32
-                $tmod = gmp_mod($t, 32);
-                $umod = gmp_mod($u, 32);
-
+                $umod = gmp_mod($u, $w);
+                $tmod = gmp_mod($t, $w);
 
                 // $C minus by $s
                 // $CMinusS mod by $modulo
@@ -404,7 +401,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 //  $RORCMinusSModByModuloAndTMod bitwise XOR with $u
                 $CMinusS = gmp_sub($C, $s[2 * $i + 1]);
                 $CMinusSModByModulo = gmp_mod($CMinusS, $modulo);
-                $RORCMinusSModByModuloAndTMod = $this->ROR($CMinusSModByModulo, $tmod, 32);
+                $RORCMinusSModByModuloAndTMod = $this->ROR($CMinusSModByModulo, $tmod, $w);
                 $C = gmp_xor($RORCMinusSModByModuloAndTMod, $u);
                 
 
@@ -414,7 +411,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 //  $RORAMinusSModByModuloAndUMod bitwise XOR with $t
                 $AMinusS = gmp_sub($A, $s[2 * $i]);            
                 $AMinusSModByModulo = gmp_mod($AMinusS, $modulo);
-                $RORAMinusSModByModuloAndUMod = $this->ROR($AMinusSModByModulo, $umod, 32);
+                $RORAMinusSModByModuloAndUMod = $this->ROR($AMinusSModByModulo, $umod, $w);
                 $A = gmp_xor($RORAMinusSModByModuloAndUMod, $t);
                 
             }
