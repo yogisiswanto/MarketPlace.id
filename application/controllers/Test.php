@@ -234,7 +234,7 @@ class Test extends CI_Controller {
 	}
 
 
-	public function otp()
+	public function otp($totalExecutionTime)
 	{
         // start running test
 		$this->benchmark->mark('code_start');
@@ -264,10 +264,10 @@ class Test extends CI_Controller {
 		$otp = $this->hotp->make($cipherText, $otpCount);
 
 		// counting otp generation
-		$otpCount = $otpCount + 1;
+		$nextGenerationOtp = $otpCount + 1;
 
 		// updating otp generation
-		$this->session->set_userdata('otp_count', $otpCount);
+		$this->session->set_userdata('otp_count', $nextGenerationOtp);
 
         // end of running test
         $this->benchmark->mark('code_end');
@@ -277,7 +277,7 @@ class Test extends CI_Controller {
 
         //initialization array
         $data = array(
-            'Otp Count'         => $otpCount-1, 
+            'Otp Count'         => $otpCount, 
             'Seed'              => $seed,
             'Key'               => $key,
             'Plaintext'         => $plaintext,
@@ -287,7 +287,12 @@ class Test extends CI_Controller {
             'Execution Time'    => $execution,
         );
 		
-		debug($data);
+		// debug($data);
+
+		
+		echo $otpCount."\t".$otp."\t".$execution." 		".$totalExecutionTime."<br/>";
+
+		return $execution;
 	}
 
     // this function is for testing execution time
@@ -301,7 +306,23 @@ class Test extends CI_Controller {
 
 		$this->session->set_userdata($data);
 
+		// this code below is for running test generate OTP untill 3 minutes or 180 seconds
+		// Please open comment tag below, in case for debuging or testing purpose
+        /*
+		$totalExecutionTime = null;
 
+		set_time_limit(200);
+
+		while ($totalExecutionTime < 180) {
+		
+			$totalExecutionTime = $totalExecutionTime + $this->otp($totalExecutionTime);
+
+		}
+
+		//and open comment tag below
+        */
+
+		// this code below is for generate OTP once time
 		$this->otp();
 	}
 }
