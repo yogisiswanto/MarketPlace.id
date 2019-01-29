@@ -36,8 +36,9 @@ class Avalancheeffect {
         $CI =& get_instance();
     }
 
+    
     // function for measurement avalancheEffect of cryptofgraphy algorithm
-    public function avalancheEffect($cipherText1, $cipherText2){
+    public function calculate($cipherText1, $cipherText2){
         
         // variable instantiation
         $counter = 0;
@@ -80,5 +81,56 @@ class Avalancheeffect {
         echo 'Total bit different = ' . $counter . '<br/>';
         echo 'Total bit = ' . $totalBit . '<br/>';
         echo 'Avalanche Effect = '. ($counter / $totalBit) * 100 . '%';
+    }
+
+    function changeBit($number)
+	{        
+        //take the last value of number
+        $initialLastInteger = $number % 10;
+        
+        //change the initial value into ASCII
+        $initialDecimal = ord($initialLastInteger);
+        
+        //change ASCII value into binnary
+        $initialBinnary = decbin($initialDecimal);
+        
+        //calculate length of byte
+		$length = strlen($initialBinnary)-1;
+
+        //condition when the last bit from initialBinnary is 1, then the last bit will change to 0 by XOR-ing with 1
+		if ($initialBinnary[$length] == 1) {
+			
+			// $binnary[$length] = 0;
+			$number = $number ^ 1;
+
+        //condition when the last bit from initialBinnary is 0, then the last bit will change to 1 by XOR-ing with 1
+		}else{
+
+			$number = $number ^ 1;
+        }
+        
+        //take the last value of modified number
+        $modifiedLastInteger = $number % 10;
+    
+        //change the last modified number value into ASCII 
+        $modifiedDecimal = ord($modifiedLastInteger);
+        
+        //change ASCII value into binnary
+        $modifiedBinnary = decbin($modifiedDecimal);
+
+        //array initiazation
+        $data = array(
+            'initialLastInteger' => $initialLastInteger,
+            'modifiedLastInteger' => $modifiedLastInteger,
+            'initialDecimal' => $initialDecimal,
+            'modifiedDecimal' => $modifiedDecimal,
+            'initialBinnary' => $initialBinnary,
+            'modifiedBinnary' => $modifiedBinnary,
+            'number' => $number
+        );
+
+        // debug($data);
+
+        return $number;
     }
 }

@@ -65,6 +65,7 @@ class Hotp {
 
         //choosen decimal mod by modulo
         $data['code'] = gmp_mod($choosenHexadecimalToDecimal, $modulo);
+        $data['codeHexa'] =  implode(" ", str_split(dechex($data['code']), 2))." ";
 
         // $otp = $choosenHexadecimalToDecimal % $modulo;
         // $array = array();
@@ -75,7 +76,8 @@ class Hotp {
         // $array['choosenHexadecimalToDecimal'] = $choosenHexadecimalToDecimal;
         // $array['otp'] = $otp;
         // return $array;
-        $data['HMAC'] = $hash;
+        $data['choosenHexadecimal'] = implode(" ", str_split($choosenHexadecimal, 2))." ";
+        $data['HMAC'] = implode(" ", str_split($hash, 2))." ";
         // return value of OTP
         return $data;
 

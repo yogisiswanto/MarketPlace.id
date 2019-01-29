@@ -47,7 +47,21 @@ class Lcg {
 
         // $X = (7 * $seed + 0) % 9999991;
         $X = ($a * $x0 + $b) % $M;
+
+        $hexadecimal = null;
+
+		// for($i=0; $i < strlen($X); $i++) { 
+			
+		// 	$hexadecimal = $hexadecimal.dechex($X[$i])." ";
+        // }
         
-        return $X;
+        $hexadecimal = dechex($X);
+
+        $data = array(
+            'X' => $X, 
+            'Hexadecimal' => $hexadecimal,
+        );
+        
+        return $data;
     }
 }
