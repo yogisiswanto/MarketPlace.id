@@ -40,6 +40,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |                                                                   |
 |       $this->rc6->decrypt($yourCiphertext, $keySchedule);         |
 |	                                                                |
+| 4. If you want to get the hexadecimal cipher text, you can Put    |
+|   your ciphertext to convertStringToHexa method                   |
+|                                                                   |
+|       $this->rc6->convertStringToHexa($yourCiphertext);           |
+|	                                                                |
 ---------------------------------------------------------------------
 */
 
@@ -429,6 +434,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             // return plaintext
             return $palinText;
+        }
+
+        // this function is for converting string to hexadecimal
+        public function convertStringToHexa($string)
+        {
+            // variable inisialization
+            $hexadecimal = null;
+
+            // proses for converting string to hexadecimal
+            for($i=0; $i < strlen($string); $i++) { 
+			
+                $hexadecimal = $hexadecimal.dechex(ord($string[$i]))." ";
+            }
+
+            // return the hexadecimal value
+            return $hexadecimal;
         }
     }        
 ?>

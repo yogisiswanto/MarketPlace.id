@@ -45,23 +45,26 @@ class Lcg {
         $b = 0;
         $M = 9999991;
 
-        // $X = (7 * $seed + 0) % 9999991;
         $X = ($a * $x0 + $b) % $M;
 
-        $hexadecimal = null;
-
-		// for($i=0; $i < strlen($X); $i++) { 
-			
-		// 	$hexadecimal = $hexadecimal.dechex($X[$i])." ";
-        // }
-        
-        $hexadecimal = dechex($X);
+        // Please open comment tag below, in case for debuging or testing purpose
+        /*
 
         $data = array(
             'X' => $X, 
-            'Hexadecimal' => $hexadecimal,
+            'Hexadecimal' => implode(" ", str_split(dechex($X), 2))." ",
         );
         
+        // show data from array
+        debug($data);
+        
+        // return array
         return $data;
+
+        //and open comment tag below
+        */
+
+        // return the result from LCG process
+        return $X;
     }
 }

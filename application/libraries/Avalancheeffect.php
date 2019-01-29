@@ -25,6 +25,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |                                                                   |
 |$this->avalancheEffect->avalancheEffect($cipherText1, $cipherText2)|
 |                                                                   |
+|  For changing bit, just put your key or plaintext into changeBit  |
+|  method                                                           |
+|                                                                   |
+|      $this->avalancheEffect->changeBit($keyOrPlaintext)           |
 ---------------------------------------------------------------------
 */
 
@@ -83,6 +87,7 @@ class Avalancheeffect {
         echo 'Avalanche Effect = '. ($counter / $totalBit) * 100 . '%';
     }
 
+    // function for change bit of key or plaintext
     function changeBit($number)
 	{        
         //take the last value of number
@@ -108,6 +113,9 @@ class Avalancheeffect {
 
 			$number = $number ^ 1;
         }
+
+        // Please open comment tag below, in case for debuging or testing purpose
+        /*
         
         //take the last value of modified number
         $modifiedLastInteger = $number % 10;
@@ -120,17 +128,21 @@ class Avalancheeffect {
 
         //array initiazation
         $data = array(
-            'initialLastInteger' => $initialLastInteger,
-            'modifiedLastInteger' => $modifiedLastInteger,
-            'initialDecimal' => $initialDecimal,
-            'modifiedDecimal' => $modifiedDecimal,
-            'initialBinnary' => $initialBinnary,
-            'modifiedBinnary' => $modifiedBinnary,
-            'number' => $number
+            'initialLastInteger'    => $initialLastInteger,
+            'modifiedLastInteger'   => $modifiedLastInteger,
+            'initialDecimal'        => $initialDecimal,
+            'modifiedDecimal'       => $modifiedDecimal,
+            'initialBinnary'        => $initialBinnary,
+            'modifiedBinnary'       => $modifiedBinnary,
+            'number'                => $number
         );
 
         // debug($data);
 
+        //and open comment tag below
+        */
+
+        // return the change key or plaintext
         return $number;
     }
 }

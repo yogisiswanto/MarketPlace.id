@@ -64,22 +64,36 @@ class Hotp {
         $choosenHexadecimalToDecimal = hexdec($choosenHexadecimal);
 
         //choosen decimal mod by modulo
-        $data['code'] = gmp_mod($choosenHexadecimalToDecimal, $modulo);
-        $data['codeHexa'] =  implode(" ", str_split(dechex($data['code']), 2))." ";
+        $otp = gmp_mod($choosenHexadecimalToDecimal, $modulo);
 
-        // $otp = $choosenHexadecimalToDecimal % $modulo;
-        // $array = array();
-        // $array['hash'] = $hash;
-        // $array['indexOffset'] = $indexOffset;
-        // $array['choosenOffset'] = $choosenOffset;
-        // $array['choosenHexadecimal'] = $choosenHexadecimal;
-        // $array['choosenHexadecimalToDecimal'] = $choosenHexadecimalToDecimal;
-        // $array['otp'] = $otp;
-        // return $array;
-        $data['choosenHexadecimal'] = implode(" ", str_split($choosenHexadecimal, 2))." ";
-        $data['HMAC'] = implode(" ", str_split($hash, 2))." ";
-        // return value of OTP
+        // Please open comment tag below, in case for debuging or testing purpose
+        /*
+
+        $data = array(
+
+            // Result from HMAC
+            'Hasil HMAC'                =>  implode(" ", str_split($hash, 2))." ",
+            
+            // Choosen Hexadecimal
+            'Hexadesimal yang Terpilih' => implode(" ", str_split($choosenHexadecimal, 2))." ",
+
+            //OTP code
+            'Kode OTP'                  => $otp,
+
+            // Hexadecimal from OTP code
+            'Hexadesimal Kode OTP'      => implode(" ", str_split(dechex($otp), 2))." ",   
+        );
+
+        // show data from array
+        // debug($data);
+        
+        // return array
         return $data;
 
+        //and open comment tag below
+        */
+
+        // return OTP value
+        return $otp;
     }
 }
