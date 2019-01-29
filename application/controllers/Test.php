@@ -203,7 +203,7 @@ class Test extends CI_Controller {
 		debug($data);
 	}
 
-
+    // this function is for testing HOTP
 	public function hotp()
 	{
 		// variable inisialization
@@ -290,6 +290,7 @@ class Test extends CI_Controller {
 		debug($data);
 	}
 
+    // this function is for testing execution time
 	public function running()
 	{
 		
