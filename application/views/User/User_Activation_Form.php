@@ -58,17 +58,23 @@
                                             $alertType = '';
                                             $message = '';
 
-                                            // if data was inserted
+                                            // condition when login success
                                             if($notification == 'login-success'){
 
                                                 $alertType = 'alert-success';
                                                 $message = 'Anda berhasil masuk. Silahkan Masukan kode Aktivasi yang sudah dikirimkan melalui layanan SMS';
 
-                                            // when data was not inserted
+                                            // condition when activation code is dismatch
                                             }else if($notification == 'activation-code-dismatch'){
 
                                                 $alertType = 'alert-danger';
                                                 $message = 'Kode Aktivasi tidak cocok';
+                                                
+                                            // condition when time is up
+                                            }else if($notification == 'time-is-up'){
+
+                                                $alertType = 'alert-danger';
+                                                $message = 'Waktu habis, silahkan ulangi kembali';
                                                 
                                             }
 

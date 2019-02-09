@@ -30,7 +30,7 @@
             $this->db->from('user');
             $this->db->where('user_id', $user_id);
             $this->db->where('activation_code', $activationCode);
-            return $this->db->get()->num_rows();
+            return $this->db->get();
         }
 
         public function update($data)

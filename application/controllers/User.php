@@ -29,6 +29,8 @@ class User extends CI_Controller {
 		$this->load->library("Date");
 		$this->load->library("Sms");
 		$this->load->library("Avalancheeffect");
+		$this->load->library("Convert");
+
 	}
 
 	// function index
@@ -317,20 +319,55 @@ class User extends CI_Controller {
 			$result = $this->User_Model->getActivationCode($userId, $activationCode);
 
 			// when activation code is match
-			if ($result == 1) {
+			if ($result->num_rows() == 1) {
 
-				// update user_status
-				$update = array(
-					'user_id'			=> $this->session->user_id,
-					'user_status'		=> 1,
-				);
+				// getting base64 of ciphertext from database
+				$base64CipherText = $result->row()->ciphertext;
 
-				// update user_status
-				$updateResult = $this->User_Model->update($update);
+				// getting key encryption from database
+				$key = $result->row()->key_encryption;
+
+				// decoding base64 ciphertext to string
+				$cipherText = base64_decode($base64CipherText);
+
+				// getting keyScheduling from key				
+				$keyScheduling 		= $this->rc6->keySchedule($key);
+
+				// decryption ciphertext using RC6 algorithm and keyScheduling
+				$plaintext 			= $this->rc6->decrypt($cipherText, $keyScheduling);
+
+				// getting interval time
+				$intervalTime = $this->date->timeInterval($plaintext);
+
+				// condition when interval time is less than 3 minute
+				if ($intervalTime == true) {
+										
+					// update user_status
+					$update = array(
+						'user_id'			=> $userId,
+						'user_status'		=> 1,
+						'key_encryption'	=> null,
+						'ciphertext'		=> null,
+						'activation_code'	=> null,
+					);
+
+					// update user_status
+					$updateResult = $this->User_Model->update($update);
+
+					// direct to formsucces
+					$this->load->view('User/welcome_page');
 				
-				// direct to formsucces
-				$this->load->view('User/welcome_page');
-			
+				// condition when interval time is greater than 3 minute				
+				}else {
+					
+					// setting notification when activation code is dismatch
+					$this->session->set_flashdata('notification', 'time-is-up');
+
+					// redirect to User_Activation_Form
+					redirect(site_url().'/User/User_Activation_Form');
+				}
+
+				
 			// when activation code is not match
 			}else{
 
@@ -401,6 +438,7 @@ class User extends CI_Controller {
 		}
 	}
 
+	// method for generating OTP
 	public function generateOTP()
 	{
 		// getting user phone number
@@ -423,7 +461,9 @@ class User extends CI_Controller {
 
 		// encryption plaintext using RC6 algorithm and keyScheduling
 		$cipherText = $this->rc6->encrypt($plaintext, $keyScheduling);
-		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
+
+		// converting ciphertext to hexadecimal
+		$base64Ciphertext = base64_encode($cipherText);
 
 		// getting current OTP generation
 		$otpCount = $this->session->otp_count;
@@ -444,8 +484,8 @@ class User extends CI_Controller {
 		$update = array(
 			'user_id'			=> $this->session->user_id,
 			'key_encryption' 	=> $key,
-			'time_generate'		=> $dateTime,
-			'activation_code'	=> $otp['code'],
+			'ciphertext'		=> $base64Ciphertext,
+			'activation_code'	=> $otp,
 		);
 
 		// update key, time generate and otp
@@ -454,21 +494,28 @@ class User extends CI_Controller {
 		//sending 6 digit otp using sms gateway
 		// $status = $this->sms->send($seed, $otp);
 
-		$data = array();
-
-		$data['updateResult'] = $updateResult;
-		$data['otpCount'] = $otpCount;
-		$data['seed'] = $seed;
-		$data['dateTime'] = $dateTime;
-		$data['plaintext'] = $plaintext;
-		$data['key'] = $key;
-		$data['keyScheduling'] = $keyScheduling;
-		$data['cipherText'] = $cipherText;
-		$data['decryption'] = $decryption;
-		$data['otp'] = $otp['code'];
-		$data['HMAC'] = $otp['HMAC'];
-		// $data['status'] = $status;
+		// Please open comment tag below, in case for debuging or testing purpose
+	    /*
+	   
+		// $data = array();
+		$data = array(
+			'Update Result' 			=> $updateResult, 
+			'OTP Count' 				=> $otpCount, 
+			'Seed' 						=> $seed, 
+			'Date and Time' 			=> $dateTime, 
+			'Key' 						=> $key, 
+			'Plaintext' 				=> $plaintext, 
+			'KeyScheduling' 			=> $keyScheduling, 
+			'Ciphertext' 				=> $ciphertext, 
+			'Base64 Encode Ciphertext' 	=> $base64Ciphertext, 
+			'Base64 Decode Ciphertext' 	=> base64_decode($base64Ciphertext), 
+			'OTP' 						=> $otp,
+			// 'SMS Sending Status'		=> $status,
+		);
 
 		// debug($data);
+		
+		//and open comment tag below
+        // */
 	}
 }

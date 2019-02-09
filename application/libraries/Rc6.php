@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
  *  Name Class      : Rc6
- *  Purpose         : Symetric Cryptofgraphy Algorithm wtih 128 length
+ *  Purpose         : Symetric Cryptography Algorithm wtih 128 length
  *  Author          : Yogi Siswanto
  *  Email           : yogisiswanto.c2@gmail.com
  *  Date Created    : 24th October 2018
@@ -434,22 +434,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             // return plaintext
             return $palinText;
-        }
-
-        // this function is for converting string to hexadecimal
-        public function convertStringToHexa($string)
-        {
-            // variable inisialization
-            $hexadecimal = null;
-
-            // proses for converting string to hexadecimal
-            for($i=0; $i < strlen($string); $i++) { 
-			
-                $hexadecimal = $hexadecimal.dechex(ord($string[$i]))." ";
-            }
-
-            // return the hexadecimal value
-            return $hexadecimal;
         }
     }        
 ?>

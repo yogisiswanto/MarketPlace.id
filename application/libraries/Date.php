@@ -29,6 +29,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | To get Date Time with delimiter, just call getDateTime method     |
 |                                                                   |
 |                  $this->date->getDateTIme();                      |
+|                                                                   |
+| To get interval time, just put start time to timeInterval method  |
+|                                                                   |
+|               $this->date->timeInterval($startTime);              |
 ---------------------------------------------------------------------
 */
 
@@ -62,21 +66,37 @@ class Date {
         return $date;
     }
 
-    // public function calculate($start)
-    // {   
+    // method for getting interval time
+    public function timeInterval($start)
+	{
+        // inisialization result
+        $result = null;
 
-    //     $dateStart = date_create($start);
+        // inisialization end time
+        $end = $this->get();
+        
+        // making time from start and end time
+		$datetime1 = date_create($start);
+		$datetime2 = date_create($end);
+        
+        // geting interval time
+		$interval = date_diff($datetime1, $datetime2);
+        
+        // geting minute from interval
+        $time = $interval->format('%i');
+        
+        // condition when start time is less than end time and interval less than 3 minute
+        if ($datetime1 < $datetime2 && $time < 3) {
+        
+            $result = true;
 
-    //     //setting default time zone
-    //     date_default_timezone_set("Asia/Jakarta");
-
-    //     // get date value without delimiter
-    //     $dateEnd = date('YmdHis');
-
-    
-    //     $calculate = date_diff($dateStart, $dateEnd);
-
-
-    // }
-
+        // condition when start time is greater than end time or interval greater than 3 minute        
+		}else {
+            
+            $result = false;
+        }
+        
+        // return result
+        return $result;
+	}
 }

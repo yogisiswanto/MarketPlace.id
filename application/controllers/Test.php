@@ -54,6 +54,7 @@ class Test extends CI_Controller {
 		$this->load->library("Date");
 		$this->load->library("Sms");
 		$this->load->library("Avalancheeffect");
+		$this->load->library("Convert");
     }
     
     // this function is for testing LCG
@@ -84,7 +85,10 @@ class Test extends CI_Controller {
 		$decryption = $this->rc6->decrypt($cipherText, $keyScheduling);
 
         // converting ciphertext to hexadecimal
-		$hexadecimal = $this->rc6->convertStringToHexa($cipherText);
+		$hexadecimal = $this->convert->stringToHexadecimal($cipherText);
+
+		// converting hexadecimal to ciphertext
+		$string = $this->convert->hexadecimalToString($hexadecimal);
 		
 		// getting keyschedule without array index
 		// for ($i=0; $i < count($keyScheduling); $i++) { 
@@ -98,7 +102,8 @@ class Test extends CI_Controller {
             'KeyScheduling' 	        => $keyScheduling, 
             'Encryption' 		        => $cipherText,
             'Decryption' 		        => $decryption,
-            'Hexadesimal Ciphertext'    => $hexadecimal,
+			'Hexadesimal Ciphertext'    => $hexadecimal,
+			'String'					=> $string,
         );
 
 		debug($data);
@@ -135,10 +140,10 @@ class Test extends CI_Controller {
 		$this->avalancheeffect->calculate($cipherText, $modifiedCipherText);
 
         // converting ciphertext to hexadecimal
-        $hexadecimal = $this->rc6->convertStringToHexa($cipherText);
+        $hexadecimal = $this->convert->stringToHexadecimal($cipherText);
         
         // converting mofied ciphertext to hexadecimal
-		$modifiedhexadecimal = $this->rc6->convertStringToHexa($modifiedCipherText);
+		$modifiedhexadecimal = $this->convert->stringToHexadecimal($modifiedCipherText);
 
 		//initialization arry
 		$data = array(
@@ -290,7 +295,9 @@ class Test extends CI_Controller {
 		// debug($data);
 
 		
-		echo $otpCount."\t".$otp."\t".$execution." 		".$totalExecutionTime."<br/>";
+		echo $otp;
+		echo "\t";
+		echo $execution."<br/>";
 
 		return $execution;
 	}
@@ -306,12 +313,13 @@ class Test extends CI_Controller {
 
 		$this->session->set_userdata($data);
 
-		// this code below is for running test generate OTP untill 3 minutes or 180 seconds
-		// Please open comment tag below, in case for debuging or testing purpose
-        /*
 		$totalExecutionTime = null;
 
-		set_time_limit(200);
+		// this code below is for running test generate OTP untill 3 minutes or 180 seconds
+		// Please open comment tag below, in case for debuging or testing purpose
+       ///*
+
+		set_time_limit(180);
 
 		while ($totalExecutionTime < 180) {
 		
@@ -320,9 +328,9 @@ class Test extends CI_Controller {
 		}
 
 		//and open comment tag below
-        */
+        //*/
 
 		// this code below is for generate OTP once time
-		$this->otp();
+		// $this->otp($totalExecutionTime);
 	}
 }
