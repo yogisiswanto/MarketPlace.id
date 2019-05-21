@@ -68,13 +68,13 @@
                                             }else if($notification == 'activation-code-dismatch'){
 
                                                 $alertType = 'alert-danger';
-                                                $message = 'Kode Aktivasi tidak cocok';
+                                                $message = 'Kode Aktivasi tidak cocok. Silahkan Masukan kode Aktivasi yang sudah dikirimkan kembali melalui layanan SMS';
                                                 
                                             // condition when time is up
                                             }else if($notification == 'time-is-up'){
 
                                                 $alertType = 'alert-danger';
-                                                $message = 'Waktu habis, silahkan ulangi kembali';
+                                                $message = 'Waktu habis. Silahkan Masukan kode Aktivasi yang sudah dikirimkan kembali melalui layanan SMS';
                                                 
                                             }
 

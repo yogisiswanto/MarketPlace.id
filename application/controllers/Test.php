@@ -239,10 +239,11 @@ class Test extends CI_Controller {
 	}
 
 
-	public function otp($totalExecutionTime)
+	// public function otp($totalExecutionTime)
+	public function otp()
 	{
         // start running test
-		$this->benchmark->mark('code_start');
+		// $this->benchmark->mark('code_start');
 
 		// using user phone number as seed
 		$seed = $this->session->seed;
@@ -275,31 +276,31 @@ class Test extends CI_Controller {
 		$this->session->set_userdata('otp_count', $nextGenerationOtp);
 
         // end of running test
-        $this->benchmark->mark('code_end');
+        // $this->benchmark->mark('code_end');
 
         // execution time
-        $execution = $this->benchmark->elapsed_time('code_start', 'code_end');
+        // $execution = $this->benchmark->elapsed_time('code_start', 'code_end');
 
         //initialization array
-        $data = array(
-            'Otp Count'         => $otpCount, 
-            'Seed'              => $seed,
-            'Key'               => $key,
-            'Plaintext'         => $plaintext,
-            'KeyScheduling'     => $keyScheduling,
-            'CipherText'        => $cipherText,
-            'Otp'               => $otp,
-            'Execution Time'    => $execution,
-        );
+        // $data = array(
+        //     'Otp Count'         => $otpCount, 
+        //     'Seed'              => $seed,
+        //     'Key'               => $key,
+        //     'Plaintext'         => $this->date->getDateTime($plaintext),
+            // 'KeyScheduling'     => $keyScheduling,
+            // 'CipherText'        => $cipherText,
+            // 'Otp'               => $otp,
+            // 'Execution Time'    => $execution,
+        // );
 		
 		// debug($data);
 
 		
-		echo $otp;
-		echo "\t";
-		echo $execution."<br/>";
+		return $otp;
+		// echo "\t";
+		// echo $execution."<br/>";
 
-		return $execution;
+		// return $execution;
 	}
 
     // this function is for testing execution time
@@ -307,30 +308,286 @@ class Test extends CI_Controller {
 	{
 		
 		$data = array(
-			'seed' => '081211111111', 
-			'otp_count' => '1',
+			'seed' => '3585281', 
+			'otp_count' => '3',
 		);
 
 		$this->session->set_userdata($data);
 
-		$totalExecutionTime = null;
+		// $totalExecutionTime = null;
 
 		// this code below is for running test generate OTP untill 3 minutes or 180 seconds
 		// Please open comment tag below, in case for debuging or testing purpose
        ///*
 
-		set_time_limit(180);
+		// set_time_limit(180);
 
-		while ($totalExecutionTime < 180) {
+		// while ($totalExecutionTime < 180) {
 		
-			$totalExecutionTime = $totalExecutionTime + $this->otp($totalExecutionTime);
+		// 	$totalExecutionTime = $totalExecutionTime + $this->otp($totalExecutionTime);
 
-		}
+		// }
 
 		//and open comment tag below
         //*/
 
 		// this code below is for generate OTP once time
 		// $this->otp($totalExecutionTime);
+
+
+		$this->otp();
+	}
+
+
+	public function exhaustiveAttack()
+	{
+		$randomOTP = array();
+
+		for ($i=0; $i < 30; $i++) { 
+
+			echo $i."------------------<br/>";
+			
+			for ($j=0; $j < 30; $j++) { 
+				
+				echo $randomOTP[$i][$j] = mt_rand(100000, 999999)."<br/>";
+			}
+		}
+
+		$randomOTP[15][15] = 583748;
+		// debug($randomOTP);
+		$i = 0;
+		$j = 0;
+		$counter = 1;
+		$otp = null;
+		$status = 0;
+
+		// for ($n=1; $n < 4; $n++) { 
+
+		// 	if ($n == 1) {
+				
+		// 		$otp = 583748;
+			
+		// 	}elseif ($n == 2) {
+				
+		// 		$otp = 928233;
+
+		// 	}elseif ($n == 3) {
+				
+		// 		$otp = 172396;
+		// 	}
+
+		// 	$status = 0;
+			
+		// 	while ($i < 30 && $status == 0) {
+			
+		// 		while ($j < 30 && $status == 0) {
+					
+		// 			if ($randomOTP[$i][$j] != $otp) {
+						
+		// 				echo $status."=====================<br/>";
+		// 				echo $randomOTP[$i][$j]." ".$otp."=====================<br/>";
+		// 				$status = 1;
+		// 			}
+		// 		}
+				
+		// 	}
+	
+		// }
+		
+		$execution = null;
+
+		for ($n=1; $n < 4; $n++) { 
+			
+			if ($n == 1) {
+				
+				$otp = 583748;
+			
+			}elseif ($n == 2) {
+				
+				$otp = 928233;
+
+			}elseif ($n == 3) {
+				
+				$otp = 172396;
+			}
+
+			for ($i=0; $i < 30; $i++) { 
+			
+				for ($j=0; $j < 30; $j++) { 
+
+					// start running test
+					$this->benchmark->mark('code_start');
+					
+					if ($randomOTP[$i][$j] == $otp) {
+						
+						echo $counter."=====================<br/>";
+						$counter++;
+					}
+
+					// end of running test
+					$this->benchmark->mark('code_end');
+
+					// execution time
+					$execution = $execution + $this->benchmark->elapsed_time('code_start', 'code_end');
+					echo $execution."=====================<br/>";
+					
+				}
+			}
+		}		
+	}
+
+	public function ea()
+	{
+		//initialization array and variable
+		$OTPforExhaustive = array();
+		$status = null;
+		$counter = null;
+		$otp = null;
+
+		// start execution time
+		$this->benchmark->mark('code_start');
+
+		for ($i = 0; $i < 1000000 ; $i++) {
+
+			if($i < 100000){
+
+				$OTPforExhaustive[$i] = str_pad($i, 6, 0, STR_PAD_LEFT);	
+			
+			}else{
+
+				$OTPforExhaustive[$i] = $i;
+			}
+		}
+		// end of execution time
+		$this->benchmark->mark('code_end');
+
+		// execution time
+		echo "Waktu Eksekusi = ".$this->benchmark->elapsed_time('code_start', 'code_end');
+		echo "<br/>";
+
+		// looping for exhaustive attack
+		// looping is working when $counter under 3 and $status is null
+		while ($counter < 3 && $status == null) {
+			
+			// condition when $counter is 1, OTP will fill with 583748
+			if ($counter == 1) {
+				
+				$otp = 583748;
+			
+			// condition when $counter is 2, OTP will fill with 928233
+			}elseif ($counter == 2) {
+				
+				$otp = 928233;
+
+			// condition when $counter is 3, OTP will fill with 172396			
+			}elseif ($counter == 3) {
+				
+				$otp = 172396;
+			}
+
+			// get random index for $OTPforExhaustive
+			$randomIndex = mt_rand(0, 999999);
+
+			// condition when $OTPforExhaustive is same with $otp
+			if ($OTPforExhaustive[$randomIndex] == $otp) {
+				
+				$status++;
+				echo $otp." - ".$status."=====================<br/>";
+			
+			// condition when $OTPforExhaustive is not same with $otp
+			}else{
+
+				$counter++;
+			}
+
+			echo "Random Index = ".$randomIndex."<br/>";
+		}
+		
+		echo "Jumlah Exhaustive Sukses = ".$status."<br/>";
+
+		debug($OTPforExhaustive);
+	}
+
+	public function trialAndError()
+	{
+		$seed = null;
+		$original = array();
+		$guess = array();
+		$hitung = 0;
+		$hitungBerhasil = 0;
+
+		for ($i=0; $i < 30; $i++) {
+
+			set_time_limit(180);
+
+			$forSeed = random_int(0, 99999999);
+
+			if ($forSeed < 10000000) {
+				
+				$seed = "0812".str_pad($forSeed, 8, 0, STR_PAD_LEFT);
+
+			}else{
+				
+				$seed = "0812".$forSeed;
+			}
+
+			$counter = 1;
+			$status = null;
+
+			$data = array(
+				'seed' => $seed, 
+				'otp_count' => $counter,
+			);
+
+			$this->session->set_userdata($data);
+
+			while ($counter <= 3 || $status == 1) {
+
+				$otp = $this->otp();
+				$forOtpTest = random_int(100000, 999999);
+
+				if ($forOtpTest < 100000) {
+				
+					$otpTest = str_pad($forOtpTest, 6, 0, STR_PAD_LEFT);
+	
+				}else{
+					
+					$otpTest = $forOtpTest;
+				}
+
+				if (gmp_intval($otp) == $otpTest) {
+					
+					$status = 1;
+					$hitungBerhasil++;
+				
+				}else{
+
+					$status = 0;
+				}
+
+				$original[$hitung] = $otp;
+				$guess[$hitung] = $otpTest;
+				echo $counter*($i+1)." - ".$otp." - ".$otpTest." - ".$status." - ".$seed."</br>";
+
+				$counter++;
+				$hitung++;
+				
+			}	
+		}
+
+
+		echo "Keberhasilan Serangan = ".$hitungBerhasil."<br/>";
+		echo "==============ORIGINAL==============<br/>";
+		for ($i=0; $i < 90; $i++) { 
+			
+			echo str_pad($original[$i], 6, 0, STR_PAD_RIGHT)."<br/>";
+		}
+
+		echo "==============TEBAKAN==============<br/>";
+
+		for ($i=0; $i < 90; $i++) { 
+			
+			echo $guess[$i]."<br/>";
+		}
 	}
 }

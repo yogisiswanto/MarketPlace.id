@@ -72,6 +72,11 @@
                                                 
                                                 $alertType = 'alert-danger';
                                                 $message = 'username/password salah';
+
+                                            }elseif ($notification == 'login-warning') {
+                                                
+                                                $alertType = 'alert-danger';
+                                                $message = 'Anda sudah masuk diperangkat lain';
                                             }
 
                                             echo    '<div id="notification" class="alert '.$alertType.' alert-dismissible fade show" role="alert">

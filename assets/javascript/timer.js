@@ -2,7 +2,7 @@
 function timer() {
     
     // variable instantiation
-    var time = 30;
+    var time = 180;
 
     // disapperaring resend link activation code
     document.getElementById('resend').style.display = 'none';

@@ -100,6 +100,9 @@ class User extends CI_Controller {
 			// checking username and password on database
 			$result = $this->User_Model->get($username, $password);
 
+			// getting user_login_status
+			$loginStatus = $result->row()->user_login_status;
+
 			// when username and password dismatch
 			if ($result->num_rows() == 0) {
 				
@@ -112,29 +115,49 @@ class User extends CI_Controller {
 			// when username and password is match			
 			}else{
 
-				// data login from user
-				$user = array(
-					'user_id'			=> $result->row()->user_id,
-					'user_full_name' 	=> $result->row()->user_full_name,
-					'user_status'		=> $result->row()->user_status,
-					'user_phone_number'	=> $result->row()->user_phone_number,
-					'login_status'		=> TRUE,
-					'seed'				=> $result->row()->user_phone_number,
-					'otp_count'			=> 0,
-				);
+				// condition when login status is 0
+				if ($loginStatus == 0) {
+					
+					// data login from user
+					$user = array(
+						'user_id'			=> $result->row()->user_id,
+						'user_full_name' 	=> $result->row()->user_full_name,
+						'user_status'		=> $result->row()->user_status,
+						'user_phone_number'	=> $result->row()->user_phone_number,
+						'login_status'		=> TRUE,
+						'seed'				=> $result->row()->user_phone_number,
+						'otp_count'			=> 0,
+					);
 
-				// inserting user data into session
-				$this->session->set_userdata($user);
+					// inserting user data into session
+					$this->session->set_userdata($user);
 
-				// setting notification when login is success
-				$this->session->set_flashdata('notification', 'login-success');
+					// setting notification when login is success
+					$this->session->set_flashdata('notification', 'login-success');
 
-				// redirect to User_Activation_Form
-				redirect(site_url().'/User/User_Activation_Form');
+					// set data for update user_login_status
+					$data = array(
+						'user_id' 			=> $result->row()->user_id,
+						'user_login_status' => TRUE,
+					);
+
+					// update user_login_status
+					$this->User_Model->update($data);
+
+					// redirect to User_Activation_Form
+					redirect(site_url().'/User/User_Activation_Form');
+
+				// condition when login status is 1
+				} else {
+					
+					// setting notification when login is fail
+					$this->session->set_flashdata('notification', 'login-warning');
+
+					// redirect into User/index
+					redirect(site_url().'/User/index');
+				}				
 			}
-
-		}
-		
+		}		
 	}
 
 	// function User_Registration_Form
@@ -260,8 +283,8 @@ class User extends CI_Controller {
 			// redirect into User/index
 			redirect(site_url().'/User/index');
 		
-		// when session is not empty and user status is 0
-		}else if($this->session->user_status == 0 && $this->session->otp_count < 3){
+		// when session is not empty, user status is 0, login_status is 1 and OTP count < 3
+		}else if($this->session->login_status == 1 && $this->session->user_status == 0 && $this->session->otp_count < 3){
 
 			// generating and sending activation code
 			$this->generateOTP();
@@ -280,7 +303,7 @@ class User extends CI_Controller {
 
 			// displaying welcome_page
 			$this->load->view('User/welcome_page');
-		}		
+		}
 	}
 
 	// function User_Activation
@@ -399,6 +422,7 @@ class User extends CI_Controller {
 		}
 	}
 
+	// funtion checking user_phone_number
 	public function user_phone_number_check_for_jquery(){
 
 		$user_phone_number = $this->input->post('user_phone_number');
@@ -419,6 +443,7 @@ class User extends CI_Controller {
 		
 	}
 
+	// function logout
 	public function logout(){
 		
 		// when session is empty
@@ -430,6 +455,19 @@ class User extends CI_Controller {
 		// when session is not empty and user status is 0
 		}else{
 
+			// set data for update user
+			$data = array(
+				'user_id' 			=> $this->session->user_id,
+				'user_login_status' => FALSE,
+				'user_status' => FALSE,
+				'key_encryption' => NULL,
+				'ciphertext' => NULL,
+				'activation_code' => NULL,
+			);
+
+			// update user_login_status
+			$this->User_Model->update($data);
+
 			// destroying session
 			$this->session->sess_destroy();
 
@@ -439,8 +477,10 @@ class User extends CI_Controller {
 	}
 
 	// method for generating OTP
-	public function generateOTP()
+	private function generateOTP()
 	{
+		set_time_limit(180);
+
 		// getting user phone number
 		$phoneNumber = $this->session->user_phone_number;
 
@@ -492,7 +532,7 @@ class User extends CI_Controller {
 		$updateResult = $this->User_Model->update($update);
 
 		//sending 6 digit otp using sms gateway
-		// $status = $this->sms->send($seed, $otp);
+		$status = $this->sms->send($seed, $otp);
 
 		// Please open comment tag below, in case for debuging or testing purpose
 	    /*
