@@ -590,4 +590,94 @@ class Test extends CI_Controller {
 			echo $guess[$i]."<br/>";
 		}
 	}
+
+	public function exhaustive()
+	{
+		$seed = null;
+		$original = array();
+		$otpTest = array();
+		$guess = array();
+		$hitung = 0;
+		$hitungBerhasil = 0;
+		$counterOTPTest = 0;
+
+		for ($i=0; $i < 1000000; $i++) { 
+			
+			if ($i < 100000) {
+			
+				$otpTest[$i] = str_pad($i, 6, 0, STR_PAD_LEFT);
+
+			}else{
+				
+				$otpTest[$i] = $i;
+			}
+
+		}
+
+
+		for ($i=0; $i < 30; $i++) {
+
+			set_time_limit(180);
+
+			$forSeed = random_int(0, 99999999);
+
+			if ($forSeed < 10000000) {
+				
+				$seed = "0812".str_pad($forSeed, 8, 0, STR_PAD_LEFT);
+
+			}else{
+				
+				$seed = "0812".$forSeed;
+			}
+
+			$counter = 1;
+			$status = null;
+
+			$data = array(
+				'seed' => $seed, 
+				'otp_count' => $counter,
+			);
+
+			$this->session->set_userdata($data);
+
+			while ($counter <= 3 || $status == 1) {
+
+				$otp = $this->otp();
+				
+
+				if (gmp_intval($otp) == $otpTest[$counterOTPTest]) {
+					
+					$status = 1;
+					$hitungBerhasil++;
+				
+				}else{
+
+					$status = 0;
+				}
+
+				$original[$hitung] = $otp;
+				$guess[$hitung] = $otpTest[$counterOTPTest];
+				echo $counter*($i+1)." - ".$otp." - ".$otpTest[$counterOTPTest]." - ".$status." - ".$seed."</br>";
+
+				$counter++;
+				$hitung++;
+				
+			}	
+		}
+
+
+		echo "Keberhasilan Serangan = ".$hitungBerhasil."<br/>";
+		echo "==============ORIGINAL==============<br/>";
+		for ($i=0; $i < 90; $i++) { 
+			
+			echo str_pad($original[$i], 6, 0, STR_PAD_RIGHT)."<br/>";
+		}
+
+		echo "==============TEBAKAN==============<br/>";
+
+		for ($i=0; $i < 90; $i++) { 
+			
+			echo $guess[$i]."<br/>";
+		}
+	}
 }

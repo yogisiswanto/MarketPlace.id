@@ -30,6 +30,7 @@ class User extends CI_Controller {
 		$this->load->library("Sms");
 		$this->load->library("Avalancheeffect");
 		$this->load->library("Convert");
+		$this->load->library("User");
 
 	}
 
